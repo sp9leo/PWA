@@ -1,0 +1,11 @@
+services:
+  yjs-server:
+    build: ./server
+    ports:
+      - "1234:1234"
+    volumes:
+      - yjs-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  yjs-data:

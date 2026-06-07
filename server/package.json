@@ -1,0 +1,15 @@
+{
+  "name": "yjs-server",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "yjs": "^13.6.31",
+    "@y/protocols": "1.0.6-1",
+    "y-leveldb": "^0.2.0",
+    "ws": "^8.18.0",
+    "lib0": "^0.2.102"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

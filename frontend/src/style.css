@@ -1,0 +1,6 @@
+/* Minimal overrides — most styling is via UnoCSS utilities */
+body {
+  margin: 0;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
