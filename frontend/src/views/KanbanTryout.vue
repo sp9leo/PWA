@@ -1,7 +1,16 @@
 <template>
   <div>
+    <div class="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-none"
+      style="-webkit-overflow-scrolling: touch">
+      <div v-for="c in radioChannels" :key="c.id"
+        class="flex-shrink-0 snap-start card !p-2.5 min-w-36">
+        <div class="font-medium text-xs">CH: {{ c.name }}</div>
+        <div v-if="c.frequency" class="text-[10px] text-gray-400 font-mono mt-0.5">{{ c.frequency }}</div>
+        <div v-if="c.description" class="text-[10px] text-gray-500 mt-0.5 truncate max-w-32">{{ c.description }}</div>
+      </div>
+    </div>
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <h1 class="text-2xl font-bold">Kanban</h1>
+      <h1 class="text-2xl font-bold">Kanban (Tryout)</h1>
       <button @click="openNew" class="btn-primary">
         <span class="text-lg leading-none">+</span> Add Unit
       </button>
@@ -21,38 +30,40 @@
       </span>
     </div>
 
-    <div class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none"
-      style="-webkit-overflow-scrolling: touch">
-      <div v-for="s in visibleStatuses" :key="s.key"
+    <VueDraggable v-model="columnList" group="columns" tag="div" handle=".column-drag-handle"
+      class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-none"
+      style="-webkit-overflow-scrolling: touch" @end="onColumnReorder">
+      <div v-for="col in visibleColumns" :key="col.id"
         class="flex-shrink-0 w-72 md:w-80 snap-start">
-        <div class="card !p-0 flex flex-col" :data-status="s.key"
-          :style="{ borderTopColor: `var(--status-${s.key})`, borderTopWidth: '3px' }">
+        <div class="card !p-0 flex flex-col" :data-status="col.statusKey"
+          :style="{ borderTopColor: `var(--status-${col.statusKey})`, borderTopWidth: '3px' }">
           <div class="flex items-center justify-between px-4 py-3 border-b border-gray-700/30">
             <div class="flex items-center gap-2">
+              <span class="column-drag-handle cursor-grab active:cursor-grabbing text-gray-500 text-sm select-none">⠿</span>
               <span class="w-2.5 h-2.5 rounded-full"
-                :style="{ backgroundColor: `var(--status-${s.key})` }"></span>
-              <span class="text-sm font-semibold">{{ s.label }}</span>
+                :style="{ backgroundColor: `var(--status-${col.statusKey})` }"></span>
+              <span class="text-sm font-semibold">{{ col.label }}</span>
               <span class="text-xs text-gray-500 bg-gray-700/50 px-1.5 py-0.5 rounded tabular-nums">
-                {{ (grouped[s.key] || []).length }}
+                {{ (grouped[col.statusKey] || []).length }}
               </span>
             </div>
-            <button @click="quickAdd(s.key)"
+            <button @click="quickAdd(col.statusKey)"
               class="text-gray-400 hover:text-white text-lg leading-none p-1 rounded-lg hover:bg-white/5 transition-colors">+</button>
           </div>
-          <VueDraggable v-model="grouped[s.key]" group="kanban" tag="div"
+          <VueDraggable v-model="grouped[col.statusKey]" group="kanban" tag="div"
             class="flex-1 p-3 space-y-2 min-h-24"
             @start="isDragging = true" @end="onDragEnd">
-            <div v-for="item in grouped[s.key]" :key="item.id">
-              <UnitCard :unit="item" @edit="editUnit(item.id)" />
+            <div v-for="item in grouped[col.statusKey]" :key="item.id">
+              <UnitCardTryout :unit="item" @edit="editUnit(item.id)" />
             </div>
-            <div v-if="!grouped[s.key]?.length"
+            <div v-if="!grouped[col.statusKey]?.length"
               class="text-xs text-gray-500 text-center py-8 pointer-events-none select-none">
               Drop units here
             </div>
           </VueDraggable>
         </div>
       </div>
-    </div>
+    </VueDraggable>
 
     <UnitForm v-if="showForm" :presetStatus="formStatus"
       :editId="editingId" @close="closeForm" />
@@ -62,11 +73,11 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
-import { useYjs } from '../composables/useYjs.js'
-import UnitCard from '../components/UnitCard.vue'
+import { useYjs, updateKanbanColumn } from '../composables/useYjs.js'
+import UnitCardTryout from '../components/UnitCardTryout.vue'
 import UnitForm from '../components/UnitForm.vue'
 
-const { units, syncKanbanState } = useYjs()
+const { units, radioChannels, kanbanColumns, syncKanbanState } = useYjs()
 
 const showForm = ref(false)
 const formStatus = ref('')
@@ -83,10 +94,16 @@ const statuses = [
   { key: 'cleared', label: 'Cleared' },
 ]
 
-const visibleStatuses = computed(() =>
+const columnList = ref([])
+
+watch(kanbanColumns, (cols) => {
+  columnList.value = [...cols].sort((a, b) => a.order - b.order)
+}, { immediate: true })
+
+const visibleColumns = computed(() =>
   filterStatus.value
-    ? statuses.filter(s => s.key === filterStatus.value)
-    : statuses
+    ? columnList.value.filter(c => c.statusKey === filterStatus.value)
+    : columnList.value
 )
 
 const filtered = computed(() => {
@@ -102,9 +119,10 @@ const filtered = computed(() => {
 const grouped = reactive({})
 
 function rebuildGrouped(list) {
-  for (const s of statuses) {
-    grouped[s.key] = list
-      .filter(u => u.status === s.key)
+  const keys = [...new Set(columnList.value.map(c => c.statusKey))]
+  for (const k of keys) {
+    grouped[k] = list
+      .filter(u => u.status === k)
       .sort((a, b) => (a.order ?? -(a.updatedAt || 0)) - (b.order ?? -(b.updatedAt || 0)))
   }
 }
@@ -117,10 +135,16 @@ watch(filtered, (val) => {
 function onDragEnd() {
   isDragging.value = false
   const columns = {}
-  for (const s of statuses) {
-    columns[s.key] = (grouped[s.key] || []).map(u => u.id)
+  for (const col of columnList.value) {
+    columns[col.statusKey] = (grouped[col.statusKey] || []).map(u => u.id)
   }
   syncKanbanState(columns)
+}
+
+function onColumnReorder() {
+  columnList.value.forEach((col, index) => {
+    updateKanbanColumn(col.id, { order: index })
+  })
 }
 
 function editUnit(id) {

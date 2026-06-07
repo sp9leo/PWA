@@ -14,6 +14,7 @@
           </RouterLink>
         </nav>
         <div class="flex items-center gap-2 text-xs">
+          <button v-if="installable" @click="install" class="btn-primary btn-sm">+ Install</button>
           <span class="w-2 h-2 rounded-full" :class="connected ? 'bg-green-500' : 'bg-red-500'"></span>
           <span class="text-gray-400 hidden sm:inline">{{ connected ? 'Live' : 'Offline' }}</span>
         </div>
@@ -31,14 +32,52 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { connected } from './composables/useYjs.js'
+import { useToast } from './composables/useToast.js'
 import Toast from './components/Toast.vue'
 
 const tabs = [
   { path: '/', name: 'Dashboard' },
   { path: '/kanban', name: 'Kanban' },
+  { path: '/kanban-tryout', name: 'Tryout' },
   { path: '/list', name: 'List' },
+  { path: '/admin', name: 'Admin' },
 ]
+
+const { add: addToast } = useToast()
+
+const installable = ref(false)
+let deferredPrompt = null
+
+onMounted(() => {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault()
+    deferredPrompt = e
+    installable.value = true
+  })
+  window.addEventListener('appinstalled', () => {
+    installable.value = false
+    deferredPrompt = null
+  })
+  // fallback: show button after 5s even if beforeinstallprompt didn't fire
+  setTimeout(() => {
+    if (!installable.value && window.matchMedia('(display-mode: browser)').matches) {
+      installable.value = true
+    }
+  }, 5000)
+})
+
+async function install() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt()
+    const result = await deferredPrompt.userChoice
+    if (result.outcome === 'accepted') installable.value = false
+    deferredPrompt = null
+  } else {
+    addToast('Open browser menu → Install "Incident Tracker"', 'info', 6000)
+  }
+}
 </script>
 
 <style>

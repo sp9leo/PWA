@@ -9,6 +9,7 @@ export default defineConfig({
     UnoCSS(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: { enabled: true, navigateFallback: 'index.html' },
       manifest: {
         name: 'Incident Tracker',
         short_name: 'Incidents',
@@ -17,7 +18,10 @@ export default defineConfig({
         background_color: '#0f172a',
         display: 'standalone',
         orientation: 'any',
+        start_url: '/',
         icons: [
+          { src: '/icon-192.svg', sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+          { src: '/icon-512.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' },
           { src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml' }
         ]
       },

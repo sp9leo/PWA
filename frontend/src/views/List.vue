@@ -8,7 +8,7 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2 mb-4">
-      <div class="relative flex-1 min-w-40 max-w-xs">
+      <div class="relative w-44">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">&#128269;</span>
         <input v-model="search" class="input-sm !pl-8" placeholder="Search units..." />
       </div>
@@ -41,6 +41,7 @@
               <th class="text-left px-4 py-3 font-medium cursor-pointer select-none hover:text-white transition-colors" @click="toggleSort('unit')">
                 Unit <span v-if="sortBy === 'unit'" class="ml-1">{{ sortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
               </th>
+              <th class="text-left px-4 py-3 font-medium hidden sm:table-cell">Type</th>
               <th class="text-left px-4 py-3 font-medium hidden sm:table-cell cursor-pointer select-none hover:text-white transition-colors" @click="toggleSort('location')">
                 Location <span v-if="sortBy === 'location'" class="ml-1">{{ sortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
               </th>
@@ -48,6 +49,8 @@
                 Status <span v-if="sortBy === 'status'" class="ml-1">{{ sortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
               </th>
               <th class="text-left px-4 py-3 font-medium hidden md:table-cell">Notes</th>
+              <th class="text-left px-4 py-3 font-medium hidden lg:table-cell">Leader</th>
+              <th class="text-left px-4 py-3 font-medium hidden lg:table-cell">Pers.</th>
               <th class="text-left px-4 py-3 font-medium hidden lg:table-cell cursor-pointer select-none hover:text-white transition-colors" @click="toggleSort('updatedAt')">
                 Updated <span v-if="sortBy === 'updatedAt'" class="ml-1">{{ sortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
               </th>
@@ -61,6 +64,7 @@
                 <div class="font-medium">{{ u.unit }}</div>
                 <div class="text-xs text-gray-500 sm:hidden">{{ u.location }}</div>
               </td>
+              <td class="px-4 py-3 text-gray-400 hidden sm:table-cell"><span class="font-mono text-xs">{{ u.type || '—' }}</span></td>
               <td class="px-4 py-3 text-gray-400 hidden sm:table-cell max-w-32 truncate">{{ u.location }}</td>
               <td class="px-4 py-3">
                 <select :value="u.status" @change="moveUnit(u.id, $event.target.value)"
@@ -69,14 +73,15 @@
                 </select>
               </td>
               <td class="px-4 py-3 text-gray-400 max-w-40 truncate hidden md:table-cell">{{ u.notes || '—' }}</td>
+              <td class="px-4 py-3 text-gray-400 text-xs hidden lg:table-cell max-w-28 truncate">{{ u.leader || '—' }}<span v-if="u.leaderPhone">&middot; {{ u.leaderPhone }}</span></td>
+              <td class="px-4 py-3 text-gray-400 text-xs hidden lg:table-cell">{{ u.personnelCount || '—' }}</td>
               <td class="px-4 py-3 text-gray-500 text-xs hidden lg:table-cell whitespace-nowrap">{{ formatTime(u.updatedAt || u.createdAt) }}</td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
                 <button @click="editUnit(u.id)" class="btn-ghost btn-sm !px-2 text-gray-400 hover:text-white" title="Edit">&#9998;</button>
-                <button @click="confirmDelete(u)" class="btn-ghost btn-sm !px-2 text-red-400 hover:text-red-300" title="Delete">&#10005;</button>
               </td>
             </tr>
             <tr v-if="sorted.length === 0">
-              <td colspan="6" class="px-4 py-12 text-center text-gray-500">
+              <td colspan="9" class="px-4 py-12 text-center text-gray-500">
                 <div class="flex flex-col items-center gap-2">
                   <span class="text-3xl">&#128260;</span>
                   <p class="text-sm">{{ search || filterStatus ? 'No matching units' : 'No units yet' }}</p>
@@ -93,23 +98,14 @@
 
     <UnitForm v-if="showForm && !editingId" @close="showForm = false" />
     <UnitForm v-if="showForm && editingId" :editId="editingId" @close="closeForm" />
-
-    <ConfirmModal v-if="deleteTarget"
-      title="Remove Unit"
-      :message="`Remove ${deleteTarget.unit}? This cannot be undone.`"
-      confirmText="Remove"
-      variant="danger"
-      @confirm="doDelete"
-      @cancel="deleteTarget = null" />
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useYjs, moveUnit as doMove, removeUnit as doRemove } from '../composables/useYjs.js'
+import { useYjs, moveUnit as doMove } from '../composables/useYjs.js'
 import { useToast } from '../composables/useToast.js'
 import UnitForm from '../components/UnitForm.vue'
-import ConfirmModal from '../components/ConfirmModal.vue'
 
 const { units, STATUSES } = useYjs()
 const { add: addToast } = useToast()
@@ -121,8 +117,6 @@ const filterStatus = ref('')
 const sortBy = ref('updatedAt')
 const sortDir = ref('desc')
 const showFilters = ref(false)
-const deleteTarget = ref(null)
-
 const statuses = [
   { key: 'en-route', label: 'En Route' },
   { key: 'on-scene', label: 'On Scene' },
@@ -184,18 +178,6 @@ function editUnit(id) {
 function closeForm() {
   showForm.value = false
   editingId.value = ''
-}
-
-function confirmDelete(u) {
-  deleteTarget.value = u
-}
-
-function doDelete() {
-  if (deleteTarget.value) {
-    doRemove(deleteTarget.value.id)
-    addToast(`${deleteTarget.value.unit} removed`, 'success')
-    deleteTarget.value = null
-  }
 }
 
 function formatTime(ts) {
