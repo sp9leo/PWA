@@ -231,12 +231,26 @@
         <div v-if="!radioChannels.length" class="text-xs text-gray-500 text-center py-4">No radio channels yet</div>
       </div>
     </div>
+
+    <div class="card mb-4">
+      <h2 class="text-sm font-semibold text-gray-300 mb-3">Security</h2>
+      <div class="flex flex-wrap items-end gap-2 mb-3">
+        <div class="flex-1 min-w-28">
+          <label class="label mb-1 block">Arriving View PIN</label>
+          <input v-model="pinForm.code" class="input-sm" placeholder="4-digit PIN" maxlength="4" pattern="[0-9]*"
+            @keydown.enter="savePin" />
+        </div>
+        <button @click="savePin" class="btn-primary btn-sm mt-5">{{ pinCode ? 'Change' : 'Set' }}</button>
+        <button v-if="pinCode" @click="clearPin" class="btn-ghost btn-sm mt-5">Remove</button>
+      </div>
+      <p class="text-xs text-gray-500">{{ pinCode ? 'PIN is currently set.' : 'No PIN set — arriving view is unprotected.' }}</p>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useYjs, addPredefinedUnit, updatePredefinedUnit, removePredefinedUnit, addSector, updateSector, removeSector, addRadioChannel, updateRadioChannel, removeRadioChannel, addUnitType, updateUnitType, removeUnitType, addKanbanColumn, updateKanbanColumn, removeKanbanColumn } from '../composables/useYjs.js'
+import { useYjs, addPredefinedUnit, updatePredefinedUnit, removePredefinedUnit, addSector, updateSector, removeSector, addRadioChannel, updateRadioChannel, removeRadioChannel, addUnitType, updateUnitType, removeUnitType, addKanbanColumn, updateKanbanColumn, removeKanbanColumn, setPinCode, pinCode } from '../composables/useYjs.js'
 import { useToast } from '../composables/useToast.js'
 
 const { predefinedUnits, sectors, radioChannels, unitTypes, kanbanColumns } = useYjs()
@@ -362,4 +376,17 @@ function saveColumnEdit() {
   editingColumnId.value = ''
 }
 function cancelColumnEdit() { editingColumnId.value = '' }
+
+const pinForm = ref({ code: '' })
+function savePin() {
+  const code = pinForm.value.code.trim()
+  if (code && !/^\d{4}$/.test(code)) { addToast('PIN must be 4 digits', 'error'); return }
+  setPinCode(code)
+  addToast(code ? 'PIN set' : 'PIN removed', 'success')
+  pinForm.value = { code: '' }
+}
+function clearPin() {
+  setPinCode('')
+  addToast('PIN removed', 'success')
+}
 </script>

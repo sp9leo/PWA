@@ -1,7 +1,7 @@
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { IndexeddbPersistence } from 'y-indexeddb'
-import { shallowRef } from 'vue'
+import { shallowRef, ref } from 'vue'
 import { nanoid } from './nanoid.js'
 
 /* ================================
@@ -16,6 +16,7 @@ let ySectors
 let yRadioChannels
 let yUnitTypes
 let yKanbanColumns
+let yAdminSettings
 let wsProvider
 let indexeddbProvider
 
@@ -29,6 +30,7 @@ const sectors = shallowRef([])
 const radioChannels = shallowRef([])
 const unitTypes = shallowRef([])
 const kanbanColumns = shallowRef([])
+const pinCode = shallowRef('')
 
 const STATUSES = ['en-route', 'on-scene', 'triaged', 'transport', 'cleared']
 const MAX_ACTIVITY = 500
@@ -51,6 +53,7 @@ function init() {
   yRadioChannels = doc.getArray('radioChannels')
   yUnitTypes = doc.getArray('unitTypes')
   yKanbanColumns = doc.getArray('kanbanColumns')
+  yAdminSettings = doc.getMap('adminSettings')
 
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:'
   const host = location.hostname
@@ -101,6 +104,7 @@ function init() {
   yRadioChannels.observeDeep(update)
   yUnitTypes.observeDeep(update)
   yKanbanColumns.observeDeep(update)
+  yAdminSettings.observe(update)
 }
 
 /* ================================
@@ -115,6 +119,7 @@ function hydrate() {
   radioChannels.value = yRadioChannels.toArray().map(m => m.toJSON())
   unitTypes.value = yUnitTypes.toArray().map(m => m.toJSON())
   kanbanColumns.value = yKanbanColumns.toArray().map(m => m.toJSON())
+  pinCode.value = (yAdminSettings.toJSON().pinCode) || ''
 }
 
 /* ================================
@@ -424,6 +429,10 @@ export function removeKanbanColumn(id) {
   })
 }
 
+export function setPinCode(code) {
+  yAdminSettings.set('pinCode', code)
+}
+
 /* ================================
    KANBAN LOGIC (IMPORTANT)
 =============================== */
@@ -473,6 +482,7 @@ export function useYjs() {
     radioChannels,
     unitTypes,
     kanbanColumns,
+    pinCode,
 
     addUnit,
     updateUnit,
@@ -494,6 +504,7 @@ export function useYjs() {
     addKanbanColumn,
     updateKanbanColumn,
     removeKanbanColumn,
+    setPinCode,
   }
 }
 

@@ -6,6 +6,7 @@ import Kanban from './views/Kanban.vue'
 import KanbanTryout from './views/KanbanTryout.vue'
 import List from './views/List.vue'
 import Admin from './views/Admin.vue'
+import Arriving from './views/Arriving.vue'
 import 'uno.css'
 
 
@@ -15,6 +16,7 @@ const routes = [
   { path: '/kanban-tryout', name: 'kanban-tryout', component: KanbanTryout, meta: { title: 'Tryout' } },
   { path: '/list', name: 'list', component: List, meta: { title: 'List' } },
   { path: '/admin', name: 'admin', component: Admin, meta: { title: 'Admin' } },
+  { path: '/arriving', name: 'arriving', component: Arriving, meta: { title: 'Arriving' } },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })
