@@ -79,17 +79,14 @@ function init() {
   })
 
   // initial hydration (with fallback timeout)
-  let seeded = false
   indexeddbProvider.whenSynced.then(() => {
-    if (yUnits.length === 0) seedDemoData()
-    seeded = true
+    if (!yAdminSettings.get('seeded')) seedDefaults()
     hydrate()
-  }).catch(() => { seeded = true })
+  }).catch(() => hydrate())
 
   setTimeout(() => {
-    if (!seeded && yUnits.length === 0) seedDemoData()
+    if (!yAdminSettings.get('seeded')) seedDefaults()
     hydrate()
-    seeded = true
   }, 2000)
 
   // observers
@@ -141,38 +138,19 @@ function now() {
 }
 
 /* ================================
-   SEED
-================================ */
+   SEED (default types + kanban columns)
+=============================== */
 
-function seedDemoData() {
-  const base = now()
-
-  const demo = [
-    ['Engine 4', 'en-route', '1420 Oak Ave'],
-    ['Truck 2', 'on-scene', '3550 Maple Dr'],
-    ['Ambulance 7', 'triaged', '3550 Maple Dr'],
-    ['Rescue 3', 'transport', '3550 Maple Dr'],
-    ['Engine 1', 'cleared', '899 Pine St'],
-  ]
-
-  const defaultTypes = ['GVGP-1', 'GVGP-2', 'GVV-V', 'GVM', 'GVC-1', 'GVC-2', 'GVC-3', 'AC', 'ALK']
-
+function seedDefaults() {
   doc.transact(() => {
-    demo.forEach(([unit, status, location], i) => {
-      const m = new Y.Map()
+    if (yAdminSettings.get('seeded')) return
 
-      m.set('id', nanoid())
-      m.set('unit', unit)
-      m.set('status', status)
-      m.set('location', location)
-      m.set('notes', '')
-      m.set('createdAt', base + i * 1000)
-      m.set('updatedAt', base + i * 1000)
+    const existingTypes = new Set(yUnitTypes.toArray().map(m => m.get('name')))
+    const existingColumns = new Set(yKanbanColumns.toArray().map(m => m.get('label')))
 
-      yUnits.push([m])
-    })
-
+    const defaultTypes = ['GVGP-1', 'GVGP-2', 'GVV-V', 'GVM', 'GVC-1', 'GVC-2', 'GVC-3', 'AC', 'ALK']
     defaultTypes.forEach(name => {
+      if (existingTypes.has(name)) return
       const m = new Y.Map()
       m.set('id', nanoid())
       m.set('name', name)
@@ -187,6 +165,7 @@ function seedDemoData() {
       { label: 'Cleared', statusKey: 'cleared' },
     ]
     defaultColumns.forEach((col, i) => {
+      if (existingColumns.has(col.label)) return
       const m = new Y.Map()
       m.set('id', nanoid())
       m.set('label', col.label)
@@ -194,6 +173,8 @@ function seedDemoData() {
       m.set('order', i)
       yKanbanColumns.push([m])
     })
+
+    yAdminSettings.set('seeded', true)
   })
 }
 

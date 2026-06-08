@@ -32,12 +32,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { connected } from './composables/useYjs.js'
 import { useToast } from './composables/useToast.js'
 import Toast from './components/Toast.vue'
 
-const isUnitMode = () => sessionStorage.getItem('role') === 'unit'
+const route = useRoute()
+const isUnitMode = computed(() => route.path === '/arriving' && route.query.mode === 'unit')
 const tabs = [
   { path: '/', name: 'Dashboard' },
   { path: '/kanban', name: 'Kanban' },
