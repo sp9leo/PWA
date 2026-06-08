@@ -23,6 +23,11 @@
             <option v-for="s in statuses" :key="s.key" :value="s.key">{{ s.label }}</option>
           </select>
         </div>
+        <div class="flex-1 min-w-18">
+          <label class="label mb-1 block">PIN</label>
+          <input v-model="unitForm.pin" class="input-sm" placeholder="4-digit" maxlength="4" pattern="[0-9]*"
+            @keydown.enter="saveUnit" />
+        </div>
         <button @click="saveUnit" class="btn-primary btn-sm mt-5">Add</button>
       </div>
       <div class="space-y-1">
@@ -35,6 +40,7 @@
               <select v-model="editUnitForm.defaultStatus" class="input-sm">
                 <option v-for="s in statuses" :key="s.key" :value="s.key">{{ s.label }}</option>
               </select>
+              <input v-model="editUnitForm.pin" class="input-sm w-16" placeholder="PIN" maxlength="4" pattern="[0-9]*" />
             </div>
             <div class="flex items-center gap-2 shrink-0 ml-2">
               <button @click="saveUnitEdit" class="text-green-400 hover:text-green-300 text-xs">Save</button>
@@ -45,6 +51,7 @@
             <div class="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
               <span class="text-sm font-medium">{{ u.name }}</span>
               <span v-if="u.type" class="text-xs text-gray-400">{{ u.type }}</span>
+              <span v-if="u.pin" class="text-xs font-mono text-gray-500">PIN:{{ u.pin }}</span>
               <span class="badge" :class="`status-bg-${u.defaultStatus} status-text-${u.defaultStatus}`">
                 {{ statusLabel(u.defaultStatus) }}
               </span>
@@ -266,19 +273,19 @@ const statuses = [
 
 const statusLabel = (s) => statuses.find(st => st.key === s)?.label || s
 
-const unitForm = ref({ name: '', type: '', defaultStatus: 'en-route' })
+const unitForm = ref({ name: '', type: '', defaultStatus: 'en-route', pin: '' })
 function saveUnit() {
   if (!unitForm.value.name.trim()) { addToast('Unit name required', 'error'); return }
   addPredefinedUnit({ ...unitForm.value })
   addToast('Predefined unit added', 'success')
-  unitForm.value = { name: '', type: '', defaultStatus: 'en-route' }
+  unitForm.value = { name: '', type: '', defaultStatus: 'en-route', pin: '' }
 }
 
 const editingUnitId = ref('')
-const editUnitForm = ref({ name: '', type: '', defaultStatus: 'en-route' })
+const editUnitForm = ref({ name: '', type: '', defaultStatus: 'en-route', pin: '' })
 function startUnitEdit(u) {
   editingUnitId.value = u.id
-  editUnitForm.value = { name: u.name, type: u.type || '', defaultStatus: u.defaultStatus }
+  editUnitForm.value = { name: u.name, type: u.type || '', defaultStatus: u.defaultStatus, pin: u.pin || '' }
 }
 function saveUnitEdit() {
   if (!editUnitForm.value.name.trim()) { addToast('Name required', 'error'); return }

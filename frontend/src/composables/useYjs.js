@@ -306,6 +306,7 @@ export function addPredefinedUnit(data = {}) {
   m.set('name', data.name || '')
   m.set('type', data.type || '')
   m.set('defaultStatus', data.defaultStatus || 'en-route')
+  m.set('pin', data.pin || '')
   doc.transact(() => { yPredefinedUnits.push([m]) })
 }
 
@@ -316,6 +317,7 @@ export function updatePredefinedUnit(id, data = {}) {
     if (data.name !== undefined) m.set('name', data.name)
     if (data.type !== undefined) m.set('type', data.type)
     if (data.defaultStatus !== undefined) m.set('defaultStatus', data.defaultStatus)
+    if (data.pin !== undefined) m.set('pin', data.pin)
   })
 }
 

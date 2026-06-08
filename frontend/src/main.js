@@ -22,8 +22,12 @@ const routes = [
 const router = createRouter({ history: createWebHistory(), routes })
 
 router.beforeEach((to) => {
-  if (sessionStorage.getItem('role') === 'unit' && to.path !== '/arriving') {
-    return { path: '/arriving', query: { mode: 'unit' } }
+  if (sessionStorage.getItem('role') === 'unit') {
+    if (to.path !== '/arriving') {
+      return { path: '/arriving', query: { mode: 'unit' } }
+    }
+  } else {
+    sessionStorage.removeItem('role')
   }
 })
 
