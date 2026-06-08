@@ -30,7 +30,7 @@ const sectors = shallowRef([])
 const radioChannels = shallowRef([])
 const unitTypes = shallowRef([])
 const kanbanColumns = shallowRef([])
-const pinCode = shallowRef('')
+export const pinCode = shallowRef('')
 
 const STATUSES = ['en-route', 'on-scene', 'triaged', 'transport', 'cleared']
 const MAX_ACTIVITY = 500
