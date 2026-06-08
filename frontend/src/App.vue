@@ -44,7 +44,6 @@ const tabs = [
   { path: '/', name: 'Dashboard' },
   { path: '/kanban', name: 'Kanban' },
   { path: '/kanban-tryout', name: 'Tryout' },
-  { path: '/list', name: 'List' },
   { path: '/admin', name: 'Admin' },
 ]
 

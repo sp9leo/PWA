@@ -252,15 +252,113 @@
       </div>
       <p class="text-xs text-gray-500">{{ pinCode ? 'PIN is currently set.' : 'No PIN set — arriving view is unprotected.' }}</p>
     </div>
+
+    <div class="card mb-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <h2 class="text-sm font-semibold text-gray-300">Active Units</h2>
+        <button @click="showUnitForm = true" class="btn-primary btn-sm">
+          <span class="text-base leading-none">+</span> Add Unit
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <div class="relative w-44">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">&#128269;</span>
+          <input v-model="unitSearch" class="input-sm !pl-8" placeholder="Search units..." />
+        </div>
+        <span v-for="s in adminStatuses" :key="s.key"
+          class="chip"
+          :class="unitFilterStatus === s.key ? 'chip-active' : 'chip-inactive'"
+          @click="unitFilterStatus = unitFilterStatus === s.key ? '' : s.key">
+          <span class="w-1.5 h-1.5 rounded-full mr-1.5" :style="{ backgroundColor: `var(--status-${s.key})` }"></span>
+          {{ s.label }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2 mb-3 min-h-8">
+        <button v-if="selectedUnitIds.length" @click="deleteSelected"
+          class="btn-sm text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 rounded-lg transition-colors px-3 text-xs">
+          Delete {{ selectedUnitIds.length }} selected
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-700/50 text-gray-400 text-xs uppercase tracking-wider">
+              <th class="px-2 py-3 w-8">
+                <input type="checkbox" :checked="allSelected" @change="toggleAll"
+                  class="accent-blue-500 cursor-pointer" />
+              </th>
+              <th class="text-left px-2 py-3 font-medium cursor-pointer select-none hover:text-white transition-colors" @click="unitToggleSort('unit')">
+                Unit <span v-if="unitSortBy === 'unit'" class="ml-1">{{ unitSortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
+              </th>
+              <th class="text-left px-2 py-3 font-medium hidden sm:table-cell">Type</th>
+              <th class="text-left px-2 py-3 font-medium hidden sm:table-cell cursor-pointer select-none hover:text-white transition-colors" @click="unitToggleSort('location')">
+                Location <span v-if="unitSortBy === 'location'" class="ml-1">{{ unitSortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
+              </th>
+              <th class="text-left px-2 py-3 font-medium cursor-pointer select-none hover:text-white transition-colors" @click="unitToggleSort('status')">
+                Status <span v-if="unitSortBy === 'status'" class="ml-1">{{ unitSortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
+              </th>
+              <th class="text-left px-2 py-3 font-medium hidden md:table-cell">Notes</th>
+              <th class="text-left px-2 py-3 font-medium hidden lg:table-cell">Leader</th>
+              <th class="text-left px-2 py-3 font-medium hidden lg:table-cell">Pers.</th>
+              <th class="text-left px-2 py-3 font-medium hidden lg:table-cell cursor-pointer select-none hover:text-white transition-colors" @click="unitToggleSort('updatedAt')">
+                Updated <span v-if="unitSortBy === 'updatedAt'" class="ml-1">{{ unitSortDir === 'asc' ? '&#9650;' : '&#9660;' }}</span>
+              </th>
+              <th class="text-right px-2 py-3 font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="u in unitSorted" :key="u.id"
+              class="border-b border-gray-700/30 hover:bg-white/5 transition-colors">
+              <td class="px-2 py-3">
+                <input type="checkbox" :checked="selectedUnitIds.includes(u.id)" @change="toggleUnit(u.id)"
+                  class="accent-blue-500 cursor-pointer" />
+              </td>
+              <td class="px-2 py-3">
+                <div class="font-medium">{{ u.unit }}</div>
+                <div class="text-xs text-gray-500 sm:hidden">{{ u.location }}</div>
+              </td>
+              <td class="px-2 py-3 text-gray-400 hidden sm:table-cell"><span class="font-mono text-xs">{{ u.type || '—' }}</span></td>
+              <td class="px-2 py-3 text-gray-400 hidden sm:table-cell max-w-32 truncate">{{ u.location }}</td>
+              <td class="px-2 py-3">
+                <select :value="u.status" @change="unitMoveStatus(u.id, $event.target.value)"
+                  class="bg-gray-700/50 border border-gray-600 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-500 cursor-pointer">
+                  <option v-for="s in STATUSES" :key="s" :value="s">{{ unitStatusLabel(s) }}</option>
+                </select>
+              </td>
+              <td class="px-2 py-3 text-gray-400 max-w-40 truncate hidden md:table-cell">{{ u.notes || '—' }}</td>
+              <td class="px-2 py-3 text-gray-400 text-xs hidden lg:table-cell max-w-28 truncate">{{ u.leader || '—' }}<span v-if="u.leaderPhone">&middot; {{ u.leaderPhone }}</span></td>
+              <td class="px-2 py-3 text-gray-400 text-xs hidden lg:table-cell">{{ u.personnelCount || '—' }}</td>
+              <td class="px-2 py-3 text-gray-500 text-xs hidden lg:table-cell whitespace-nowrap">{{ unitFormatTime(u.updatedAt || u.createdAt) }}</td>
+              <td class="px-2 py-3 text-right whitespace-nowrap">
+                <button @click="unitEdit(u.id)" class="btn-ghost btn-sm !px-2 text-gray-400 hover:text-white" title="Edit">&#9998;</button>
+                <button @click="unitDelete(u.id)" class="btn-ghost btn-sm !px-2 text-red-400 hover:text-red-300" title="Delete">&#10005;</button>
+              </td>
+            </tr>
+            <tr v-if="!unitSorted.length">
+              <td colspan="11" class="px-4 py-12 text-center text-gray-500 text-sm">
+                {{ unitSearch || unitFilterStatus ? 'No matching units' : 'No units yet' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <UnitForm v-if="showUnitForm && !activeUnitEditId" @close="showUnitForm = false" />
+    <UnitForm v-if="showUnitForm && activeUnitEditId" :editId="activeUnitEditId" @close="closeUnitForm" />
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useYjs, addPredefinedUnit, updatePredefinedUnit, removePredefinedUnit, addSector, updateSector, removeSector, addRadioChannel, updateRadioChannel, removeRadioChannel, addUnitType, updateUnitType, removeUnitType, addKanbanColumn, updateKanbanColumn, removeKanbanColumn, setPinCode, pinCode } from '../composables/useYjs.js'
+import { useYjs, addPredefinedUnit, updatePredefinedUnit, removePredefinedUnit, addSector, updateSector, removeSector, addRadioChannel, updateRadioChannel, removeRadioChannel, addUnitType, updateUnitType, removeUnitType, addKanbanColumn, updateKanbanColumn, removeKanbanColumn, removeUnit, moveUnit, setPinCode, pinCode } from '../composables/useYjs.js'
 import { useToast } from '../composables/useToast.js'
+import UnitForm from '../components/UnitForm.vue'
 
-const { predefinedUnits, sectors, radioChannels, unitTypes, kanbanColumns } = useYjs()
+const { predefinedUnits, sectors, radioChannels, unitTypes, kanbanColumns, units, STATUSES } = useYjs()
 const { add: addToast } = useToast()
 
 const statuses = [
@@ -395,5 +493,107 @@ function savePin() {
 function clearPin() {
   setPinCode('')
   addToast('PIN removed', 'success')
+}
+
+/* ---------- Active Units ---------- */
+const adminStatuses = [
+  { key: 'en-route', label: 'En Route' },
+  { key: 'on-scene', label: 'On Scene' },
+  { key: 'triaged', label: 'Triaged' },
+  { key: 'transport', label: 'Transport' },
+  { key: 'cleared', label: 'Cleared' },
+]
+const unitStatusLabel = (s) => adminStatuses.find(st => st.key === s)?.label || s
+
+const showUnitForm = ref(false)
+const activeUnitEditId = ref('')
+const unitSearch = ref('')
+const unitFilterStatus = ref('')
+const unitSortBy = ref('updatedAt')
+const unitSortDir = ref('desc')
+const selectedUnitIds = ref([])
+
+function unitToggleSort(col) {
+  if (unitSortBy.value === col) {
+    unitSortDir.value = unitSortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    unitSortBy.value = col
+    unitSortDir.value = 'asc'
+  }
+}
+
+const unitFiltered = computed(() => {
+  let list = [...units.value]
+  const q = unitSearch.value.toLowerCase().trim()
+  if (q) {
+    list = list.filter(u =>
+      u.unit.toLowerCase().includes(q) || (u.location || '').toLowerCase().includes(q)
+    )
+  }
+  if (unitFilterStatus.value) {
+    list = list.filter(u => u.status === unitFilterStatus.value)
+  }
+  list.sort((a, b) => {
+    const aVal = a[unitSortBy.value] ?? ''
+    const bVal = b[unitSortBy.value] ?? ''
+    const cmp = typeof aVal === 'string' ? aVal.localeCompare(bVal) : aVal - bVal
+    return unitSortDir.value === 'asc' ? cmp : -cmp
+  })
+  return list
+})
+
+const unitSorted = computed(() => unitFiltered.value)
+
+const allSelected = computed(() =>
+  unitSorted.value.length > 0 && selectedUnitIds.value.length === unitSorted.value.length
+)
+
+function toggleUnit(id) {
+  const idx = selectedUnitIds.value.indexOf(id)
+  if (idx > -1) selectedUnitIds.value.splice(idx, 1)
+  else selectedUnitIds.value.push(id)
+}
+
+function toggleAll() {
+  if (allSelected.value) selectedUnitIds.value = []
+  else selectedUnitIds.value = unitSorted.value.map(u => u.id)
+}
+
+function deleteSelected() {
+  if (!selectedUnitIds.value.length) return
+  selectedUnitIds.value.forEach(id => removeUnit(id))
+  addToast(`Deleted ${selectedUnitIds.value.length} unit(s)`, 'success')
+  selectedUnitIds.value = []
+}
+
+function unitMoveStatus(id, status) {
+  moveUnit(id, status)
+  addToast(`Status updated to ${unitStatusLabel(status)}`, 'info')
+}
+
+function unitDelete(id) {
+  removeUnit(id)
+  addToast('Unit deleted', 'success')
+  selectedUnitIds.value = selectedUnitIds.value.filter(i => i !== id)
+}
+
+function unitEdit(id) {
+  activeUnitEditId.value = id
+  showUnitForm.value = true
+}
+
+function closeUnitForm() {
+  showUnitForm.value = false
+  activeUnitEditId.value = ''
+}
+
+function unitFormatTime(ts) {
+  if (!ts) return '—'
+  const d = new Date(ts)
+  const now = new Date()
+  const sameDay = d.toDateString() === now.toDateString()
+  const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+  if (sameDay) return time
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + time
 }
 </script>
