@@ -11,7 +11,7 @@
           {{ label }}
         </span>
         <button @click="$emit('edit', unit.id)"
-          class="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors text-xs shrink-0">
+          class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors text-xs shrink-0">
           &#9998;
         </button>
         <span class="text-gray-500 text-xs select-none touch-none px-0.5 cursor-grab active:cursor-grabbing">&#9776;</span>

@@ -65,7 +65,7 @@
       </div>
     </VueDraggable>
 
-    <UnitForm v-if="showForm" :presetStatus="formStatus"
+    <UnitFormTryout v-if="showForm" :presetStatus="formStatus"
       :editId="editingId" @close="closeForm" />
   </div>
 </template>
@@ -75,7 +75,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useYjs, updateKanbanColumn } from '../composables/useYjs.js'
 import UnitCardTryout from '../components/UnitCardTryout.vue'
-import UnitForm from '../components/UnitForm.vue'
+import UnitFormTryout from '../components/UnitFormTryout.vue'
 
 const { units, radioChannels, kanbanColumns, syncKanbanState } = useYjs()
 
