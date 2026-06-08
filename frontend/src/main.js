@@ -21,4 +21,10 @@ const routes = [
 
 const router = createRouter({ history: createWebHistory(), routes })
 
+router.beforeEach((to) => {
+  if (sessionStorage.getItem('role') === 'unit' && to.path !== '/arriving') {
+    return { path: '/arriving', query: { mode: 'unit' } }
+  }
+})
+
 createApp(App).use(router).mount('#app')

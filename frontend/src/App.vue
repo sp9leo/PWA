@@ -6,7 +6,7 @@
           <span class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-xs font-bold">IT</span>
           Incident Tracker
         </RouterLink>
-        <nav class="flex items-center gap-1">
+        <nav v-if="!isUnitMode" class="flex items-center gap-1">
           <RouterLink v-for="tab in tabs" :key="tab.path" :to="tab.path"
             class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
             :class="$route.path === tab.path ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'">
@@ -37,6 +37,7 @@ import { connected } from './composables/useYjs.js'
 import { useToast } from './composables/useToast.js'
 import Toast from './components/Toast.vue'
 
+const isUnitMode = () => sessionStorage.getItem('role') === 'unit'
 const tabs = [
   { path: '/', name: 'Dashboard' },
   { path: '/kanban', name: 'Kanban' },

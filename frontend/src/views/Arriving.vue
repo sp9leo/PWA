@@ -1,5 +1,8 @@
 <template>
   <div class="max-w-md mx-auto">
+    <div v-if="isUnitMode" class="text-xs text-center text-gray-500 mb-4 bg-gray-800 rounded-lg py-2 px-3">
+      Unit mode — this device can only access the arriving view
+    </div>
     <div v-if="!authenticated && pinCode" class="flex flex-col items-center justify-center min-h-[60vh]">
       <div class="text-center mb-6">
         <div class="text-4xl mb-2">🔐</div>
@@ -99,11 +102,17 @@
 
 <script setup>
 import { computed, reactive, ref, nextTick } from 'vue'
-import { useYjs, addUnit, pinCode } from '../composables/useYjs.js'
+import { useYjs, addUnit, pinCode, connected } from '../composables/useYjs.js'
 import { useToast } from '../composables/useToast.js'
 
 const { units, unitTypes, predefinedUnits, STATUSES, connected } = useYjs()
 const { add: addToast } = useToast()
+
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const isUnitMode = route.query.mode === 'unit'
+if (isUnitMode) sessionStorage.setItem('role', 'unit')
 
 const authenticated = ref(sessionStorage.getItem('arriving_auth') === 'true')
 
