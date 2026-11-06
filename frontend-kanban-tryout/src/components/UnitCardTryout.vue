@@ -49,16 +49,17 @@
       {{ unit.notes }}
     </div>
 
-    <!-- Bottom Row: Leader + Status badge (small) + Timestamp -->
-    <div class="flex justify-between items-end gap-2 pt-2 border-t border-gray-200">
-      <div class="text-sm text-gray-600 min-w-0">
-        <div v-if="unit.leader" class="font-semibold truncate">
-          {{ unit.leader }}
-          <span v-if="unit.leaderPhone" class="text-gray-700 text-sm font-medium"> · {{ unit.leaderPhone }}</span>
-        </div>
-        <span v-else class="text-gray-400 text-xs">—</span>
+    <!-- Leader (above separator) -->
+    <div class="text-sm text-gray-600 min-w-0 mb-2">
+      <div v-if="unit.leader" class="font-semibold truncate">
+        {{ unit.leader }}
+        <span v-if="unit.leaderPhone" class="text-gray-700 text-sm font-medium"> · {{ unit.leaderPhone }}</span>
       </div>
+      <span v-else class="text-gray-400 text-xs">—</span>
+    </div>
 
+    <!-- Bottom Row: Status badge (small) + Timestamp + controls -->
+    <div class="flex justify-between items-end gap-2 pt-2 border-t border-gray-200">
       <div class="flex items-center gap-2 shrink-0">
         <!-- Status badge: smaller, bottom right (column title already shows status) -->
         <span

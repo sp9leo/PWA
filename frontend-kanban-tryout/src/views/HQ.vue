@@ -149,27 +149,25 @@
                     </div>
                   </div>
 
-                  <!-- Bottom row: leader + status badge + time -->
-                  <div class="flex justify-between items-end gap-2 pt-2 border-t border-gray-200">
-                    <div class="text-sm text-gray-600 min-w-0">
-                      <div v-if="unit.leader" class="font-semibold truncate">
-                        {{ unit.leader }}
-                        <span v-if="unit.leaderPhone" class="text-gray-700 text-sm font-medium"> · {{ unit.leaderPhone }}</span>
-                      </div>
-                      <span v-else class="text-gray-400 text-xs">—</span>
+                  <!-- Leader (above separator) -->
+                  <div class="text-sm text-gray-600 min-w-0 mb-2">
+                    <div v-if="unit.leader" class="font-semibold truncate">
+                      {{ unit.leader }}
+                      <span v-if="unit.leaderPhone" class="text-gray-700 text-sm font-medium"> · {{ unit.leaderPhone }}</span>
                     </div>
+                    <span v-else class="text-gray-400 text-xs">—</span>
+                  </div>
 
-                    <div class="flex items-center gap-2 shrink-0">
-                      <!-- Status badge: smaller, bottom right -->
-                      <span
-                        class="badge uppercase shrink-0"
-                        :class="`status-bg-${unit.status} status-text-${unit.status}`"
-                        style="font-size: 0.7rem; padding: 0.15rem 0.5rem;"
-                      >
-                        {{ statusLabel(unit.status) }}
-                      </span>
-                      <div class="text-xs font-mono text-gray-500 shrink-0">{{ formatTime(unit.updatedAt || unit.createdAt) }}</div>
-                    </div>
+                  <!-- Bottom row: status badge + time -->
+                  <div class="flex justify-end items-center gap-2 pt-2 border-t border-gray-200">
+                    <span
+                      class="badge uppercase shrink-0"
+                      :class="`status-bg-${unit.status} status-text-${unit.status}`"
+                      style="font-size: 0.7rem; padding: 0.15rem 0.5rem;"
+                    >
+                      {{ statusLabel(unit.status) }}
+                    </span>
+                    <div class="text-xs font-mono text-gray-500 shrink-0">{{ formatTime(unit.updatedAt || unit.createdAt) }}</div>
                   </div>
                 </div>
                 <div v-if="colUnits(col.statusKey).length === 0"
