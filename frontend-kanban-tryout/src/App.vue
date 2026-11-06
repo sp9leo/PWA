@@ -8,13 +8,16 @@
         </RouterLink>
         <nav class="flex items-center gap-1">
           <RouterLink v-for="tab in tabs" :key="tab.path" :to="tab.path"
+            v-if="!$route.path.startsWith('/hq') || tab.path === '/hq'"
             class="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
             :class="$route.path === tab.path ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'">
             {{ tab.name }}
           </RouterLink>
         </nav>
         <div class="flex items-center gap-2 text-xs">
+          <!-- Install button hidden for now
           <button v-if="installable" @click="install" class="btn-primary btn-sm">+ Install</button>
+          -->
           <span class="w-2 h-2 rounded-full" :class="connected ? 'bg-green-500' : 'bg-red-500'"></span>
           <span class="text-gray-600 hidden sm:inline">{{ connected ? 'Live' : 'Offline' }}</span>
         </div>
