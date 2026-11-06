@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted, nextTick } from 'vue'
+import { reactive, ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useYjs, addUnit, updateUnit } from '../composables/useYjs.js'
 import { normalizeVehicles } from '../composables/vehicles.js'
 import { useToast } from '../composables/useToast.js'
@@ -232,6 +232,13 @@ onMounted(() => {
       }
     }
   }
+})
+
+// Close modal with Escape key
+onMounted(() => {
+  const onEsc = (e) => { if (e.key === 'Escape') emit('close') }
+  window.addEventListener('keydown', onEsc)
+  onBeforeUnmount(() => window.removeEventListener('keydown', onEsc))
 })
 
 const statusLabel = (s) => ({ 'en-route': 'V PRIHODU', 'on-scene': 'NERAZPOREJENI', 'triaged': 'V POSREDOVANJU', 'transport': 'ODHOD', 'cleared': 'DRUGO' }[s] || s)
