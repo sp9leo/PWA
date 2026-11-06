@@ -102,12 +102,12 @@
                   </span>
                 </div>
               </div>
-              <div class="flex-1 p-3 space-y-2 min-h-[60px]">
+              <div class="flex-1 p-3 space-y-3 min-h-[60px]">
                 <div
                   v-for="unit in colUnits(col.statusKey)"
                   :key="unit.id"
                   class="hq-card cursor-default"
-                  :style="{ borderLeftColor: `var(--status-${unit.status})`, borderLeftWidth: '4px' }"
+                  :style="{ borderLeftColor: `var(--status-${unit.status})`, borderLeftWidth: '0' }"
                 >
                   <!-- Unit name: prominent, top -->
                   <div class="font-bold text-base text-gray-900 leading-tight line-clamp-2 mb-1">
@@ -459,6 +459,6 @@ function vehicleSummary(unit) {
 
 <style scoped>
 .hq-card {
-  @apply bg-white border border-gray-200 rounded-xl p-3 shadow-sm;
+  @apply bg-white border border-gray-200 rounded-xl p-4 shadow-sm;
 }
 </style>
