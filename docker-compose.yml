@@ -7,5 +7,14 @@ services:
       - yjs-data:/app/data
     restart: unless-stopped
 
+  frontend:
+    build: ./frontend-kanban-tryout
+    ports:
+      - "5173:80"
+    depends_on:
+      yjs-server:
+        condition: service_started
+    restart: unless-stopped
+
 volumes:
   yjs-data:
