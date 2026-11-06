@@ -7,8 +7,7 @@
           Incident Tracker
         </RouterLink>
         <nav class="flex items-center gap-1">
-          <RouterLink v-for="tab in tabs" :key="tab.path" :to="tab.path"
-            v-if="!$route.path.startsWith('/hq') || tab.path === '/hq'"
+          <RouterLink v-for="tab in visibleTabs" :key="tab.path" :to="tab.path"
             class="px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
             :class="$route.path === tab.path ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'">
             {{ tab.name }}
@@ -47,6 +46,12 @@ const tabs = [
   { path: '/admin', name: 'Admin' },
   { path: '/hq', name: 'HQ' },
 ]
+
+// On HQ view, only show the HQ nav link
+const visibleTabs = computed(() => {
+  if (route.path.startsWith('/hq')) return tabs.filter(t => t.path === '/hq')
+  return tabs
+})
 
 const { add: addToast } = useToast()
 
