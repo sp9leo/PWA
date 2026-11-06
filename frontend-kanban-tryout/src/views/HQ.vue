@@ -110,31 +110,21 @@
                   :style="{ borderLeftColor: `var(--status-${unit.status})`, borderLeftWidth: '0' }"
                 >
                   <!-- Unit name: prominent, top -->
-                  <div class="font-bold text-base text-gray-900 leading-tight line-clamp-2 mb-1">
+                  <div class="font-bold text-base text-gray-900 leading-tight line-clamp-2 mb-2">
                     {{ unit.unit }}
                   </div>
 
-                  <div class="mt-1 flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
-                      <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span class="truncate max-w-[200px]">{{ unit.location || '—' }}</span>
-                    </div>
-
-                    <!-- Status badge: smaller, bottom right (column title already shows status) -->
-                    <span
-                      class="badge uppercase shrink-0"
-                      :class="`status-bg-${unit.status} status-text-${unit.status}`"
-                      style="font-size: 0.7rem; padding: 0.15rem 0.5rem;"
-                    >
-                      {{ statusLabel(unit.status) }}
-                    </span>
+                  <!-- Location -->
+                  <div class="flex items-center gap-1.5 text-sm font-semibold text-gray-900 mb-2">
+                    <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="truncate max-w-[200px]">{{ unit.location || '—' }}</span>
                   </div>
 
                   <!-- Vehicle types & crew -->
-                  <div v-if="vehicleGroups(unit).length || totalCrew(unit)" class="mt-1 flex flex-wrap items-center gap-2">
+                  <div v-if="vehicleGroups(unit).length || totalCrew(unit)" class="flex flex-wrap items-center gap-2 mb-2">
                     <div
                       v-for="g in vehicleGroups(unit)"
                       :key="g.type"
@@ -159,8 +149,27 @@
                     </div>
                   </div>
 
-                  <div class="mt-1 text-sm text-gray-600 truncate">
-                    {{ unit.leader }}{{ unit.leaderPhone ? ' · ' + unit.leaderPhone : '' }}
+                  <!-- Bottom row: leader + status badge + time -->
+                  <div class="flex justify-between items-end gap-2 pt-2 border-t border-gray-200">
+                    <div class="text-sm text-gray-600 min-w-0">
+                      <div v-if="unit.leader" class="font-semibold truncate">
+                        {{ unit.leader }}
+                        <span v-if="unit.leaderPhone" class="text-gray-700 text-sm font-medium"> · {{ unit.leaderPhone }}</span>
+                      </div>
+                      <span v-else class="text-gray-400 text-xs">—</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                      <!-- Status badge: smaller, bottom right -->
+                      <span
+                        class="badge uppercase shrink-0"
+                        :class="`status-bg-${unit.status} status-text-${unit.status}`"
+                        style="font-size: 0.7rem; padding: 0.15rem 0.5rem;"
+                      >
+                        {{ statusLabel(unit.status) }}
+                      </span>
+                      <div class="text-xs font-mono text-gray-500 shrink-0">{{ formatTime(unit.updatedAt || unit.createdAt) }}</div>
+                    </div>
                   </div>
                 </div>
                 <div v-if="colUnits(col.statusKey).length === 0"
@@ -459,6 +468,6 @@ function vehicleSummary(unit) {
 
 <style scoped>
 .hq-card {
-  @apply bg-white border border-gray-200 rounded-xl p-4 shadow-sm;
+  @apply bg-white border border-gray-200 rounded-xl p-3 shadow-2xl;
 }
 </style>
