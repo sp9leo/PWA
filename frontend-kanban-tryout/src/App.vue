@@ -42,8 +42,8 @@
               {{ statusLabelShort[s] }}
             </div>
           </div>
-          <div class="flex items-center gap-3 text-2xl font-bold text-gray-900">
-            <span>{{ unitsByStatus[s] }}</span>
+          <div class="flex items-center gap-3">
+            <span class="text-2xl font-bold text-gray-900">{{ unitsByStatus[s] }}</span>
             <span class="text-xs font-medium text-gray-500">{{ crewByStatus[s] }} crew</span>
           </div>
         </div>
