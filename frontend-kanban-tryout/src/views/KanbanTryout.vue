@@ -66,6 +66,9 @@
                 <span v-if="crewInColumn(col.statusKey)" class="text-xs font-medium text-gray-500 ml-1">
                   {{ crewInColumn(col.statusKey) }} crew
                 </span>
+                <span v-if="vehiclesInColumn(col.statusKey)" class="text-xs font-medium text-gray-500 ml-1">
+                  {{ vehiclesInColumn(col.statusKey) }} vehicle{{ vehiclesInColumn(col.statusKey) !== 1 ? 's' : '' }}
+                </span>
               </div>
               <button @click="quickAdd(col.statusKey)"
                 class="w-8 h-8 shrink-0 flex items-center justify-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 text-xl leading-none rounded-lg transition-colors">+</button>
@@ -373,6 +376,11 @@ function formatWhen(u) {
 function crewInColumn(statusKey) {
   const units = grouped[statusKey] || []
   return units.reduce((sum, u) => sum + (u.personnelCount || 0), 0)
+}
+
+function vehiclesInColumn(statusKey) {
+  const units = grouped[statusKey] || []
+  return units.reduce((sum, u) => sum + (u.vehicles?.length || 1), 0)
 }
 
 function onDragEnd() {
