@@ -23,6 +23,28 @@
       </div>
     </header>
     <main class="max-w-7xl mx-auto px-4 py-6">
+      <!-- Counters strip -->
+      <div class="mb-4 flex flex-wrap gap-4">
+        <div class="flex-1 min-w-[140px] bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total units</div>
+          <div class="text-2xl font-bold text-gray-900">{{ totalUnits }}</div>
+        </div>
+        <div class="flex-1 min-w-[140px] bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+          <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total crew</div>
+          <div class="text-2xl font-bold text-gray-900">{{ totalCrew }}</div>
+        </div>
+        <div v-for="s in STATUSES" :key="s.key"
+          class="flex-1 min-w-[140px] bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-2 h-2 rounded-full"
+              :style="{ backgroundColor: `var(--status-${s})` }"></span>
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              {{ statusLabelShort[s] }}
+            </div>
+          </div>
+          <div class="text-2xl font-bold text-gray-900">{{ unitsByStatus[s] }}</div>
+        </div>
+      </div>
       <RouterView v-slot="{ Component, route }">
         <Transition name="page" mode="out-in">
           <component :is="Component" :key="route.path" />
@@ -36,7 +58,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { connected } from './composables/useYjs.js'
+import { connected, useYjs } from './composables/useYjs.js'
 import { useToast } from './composables/useToast.js'
 import Toast from './components/Toast.vue'
 
@@ -52,6 +74,20 @@ const visibleTabs = computed(() => {
   if (route.path.startsWith('/hq')) return tabs.filter(t => t.path === '/hq')
   return tabs
 })
+
+const {
+  totalUnits,
+  unitsByStatus,
+  totalCrew,
+} = useYjs()
+
+const statusLabelShort = {
+  'en-route': 'V PRIHODU',
+  'on-scene': 'NERAZPOREJENI',
+  'triaged': 'V POSREDOVANJU',
+  'transport': 'ODHOD',
+  'cleared': 'DRUGO',
+}
 
 const { add: addToast } = useToast()
 

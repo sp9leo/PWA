@@ -1,7 +1,7 @@
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { IndexeddbPersistence } from 'y-indexeddb'
-import { shallowRef, ref } from 'vue'
+import { shallowRef, ref, computed } from 'vue'
 import { nanoid } from './nanoid.js'
 
 /* ================================
@@ -520,6 +520,24 @@ export function syncKanbanState(columns) {
 export function useYjs() {
   init()
 
+  /* -------------------------------
+     Counters
+  ------------------------------ */
+  const totalUnits = computed(() => units.value.length)
+
+  const unitsByStatus = computed(() => {
+    const counts = {}
+    STATUSES.forEach(s => { counts[s] = 0 })
+    units.value.forEach(u => {
+      counts[u.status] = (counts[u.status] || 0) + 1
+    })
+    return counts
+  })
+
+  const totalCrew = computed(() =>
+    units.value.reduce((sum, u) => sum + (u.personnelCount || 0), 0)
+  )
+
   return {
     units,
     activities,
@@ -534,6 +552,10 @@ export function useYjs() {
     pinCode,
     readOnly,
     setReadOnly,
+
+    totalUnits,
+    unitsByStatus,
+    totalCrew,
 
     addUnit,
     updateUnit,
