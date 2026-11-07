@@ -538,6 +538,15 @@ export function useYjs() {
     units.value.reduce((sum, u) => sum + (u.personnelCount || 0), 0)
   )
 
+  const crewByStatus = computed(() => {
+    const counts = {}
+    STATUSES.forEach(s => { counts[s] = 0 })
+    units.value.forEach(u => {
+      counts[u.status] = (counts[u.status] || 0) + (u.personnelCount || 0)
+    })
+    return counts
+  })
+
   return {
     units,
     activities,
@@ -556,6 +565,7 @@ export function useYjs() {
     totalUnits,
     unitsByStatus,
     totalCrew,
+    crewByStatus,
 
     addUnit,
     updateUnit,

@@ -43,6 +43,7 @@
             </div>
           </div>
           <div class="text-2xl font-bold text-gray-900">{{ unitsByStatus[s] }}</div>
+          <div class="text-xs font-medium text-gray-500">{{ crewByStatus[s] }} crew</div>
         </div>
       </div>
       <RouterView v-slot="{ Component, route }">
@@ -79,6 +80,8 @@ const {
   totalUnits,
   unitsByStatus,
   totalCrew,
+  crewByStatus,
+  STATUSES,
 } = useYjs()
 
 const statusLabelShort = {

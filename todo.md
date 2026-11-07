@@ -8,7 +8,7 @@
 - [ ] **ETA for arriving units** — input field for estimated time of arrival per unit, ETA countdown/overdue indicator on kanban cards
 - [ ] **Unit-mode exit mechanism** — way for unit devices to leave unit mode (e.g. re-enter admin PIN, QR code scan, or remote unlock from admin view)
 - [ ] **Fix arriving view, unit dispatch flow and unit live view** — refine PIN login, dispatch from predefined unit, and real-time tracking card for dispatched units
-- [x] **Crew and unit counters** — live totals for crew and units across statuses/locations (done: counters strip in header)
+- [x] **Crew and unit counters** — live totals for crew and units across statuses/locations (done: counters strip in header with per-status crew counts)
 - [ ] **Dashboard with statistics** — summary view with unit counts by status, crew totals, location breakdown
 - [ ] **Bulk change status and location** — select multiple units and update status/location in one action
 - [ ] **Offline work & sync** — work offline on local PC, sync changes to server when connection is available
