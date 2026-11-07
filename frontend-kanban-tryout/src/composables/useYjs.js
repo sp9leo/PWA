@@ -483,6 +483,73 @@ export function setPinCode(code) {
 }
 
 /* ================================
+   EXPORT / IMPORT
+================================= */
+
+export function exportData() {
+  const data = {
+    version: 1,
+    exportedAt: now(),
+    units: yUnits.toArray().map(m => m.toJSON()),
+    activities: yActivity.toArray().map(m => m.toJSON()),
+    predefinedUnits: yPredefinedUnits.toArray().map(m => m.toJSON()),
+    sectors: ySectors.toArray().map(m => m.toJSON()),
+    radioChannels: yRadioChannels.toArray().map(m => m.toJSON()),
+    unitTypes: yUnitTypes.toArray().map(m => m.toJSON()),
+    kanbanColumns: yKanbanColumns.toArray().map(m => m.toJSON()),
+    adminSettings: yAdminSettings.toJSON(),
+  }
+  return data
+}
+
+function clearYArray(arr) {
+  while (arr.length > 0) {
+    arr.delete(0, 1)
+  }
+}
+
+export function importData(data) {
+  if (!data || data.version !== 1) {
+    throw new Error('Invalid export format')
+  }
+
+  doc.transact(() => {
+    clearYArray(yUnits)
+    clearYArray(yActivity)
+    clearYArray(yPredefinedUnits)
+    clearYArray(ySectors)
+    clearYArray(yRadioChannels)
+    clearYArray(yUnitTypes)
+    clearYArray(yKanbanColumns)
+
+    const addMaps = (yarray, items) => {
+      items.forEach(item => {
+        const m = new Y.Map()
+        for (const [k, v] of Object.entries(item)) {
+          if (k === '_y') return
+          m.set(k, v)
+        }
+        yarray.push([m])
+      })
+    }
+
+    addMaps(yUnits, data.units || [])
+    addMaps(yActivity, data.activities || [])
+    addMaps(yPredefinedUnits, data.predefinedUnits || [])
+    addMaps(ySectors, data.sectors || [])
+    addMaps(yRadioChannels, data.radioChannels || [])
+    addMaps(yUnitTypes, data.unitTypes || [])
+    addMaps(yKanbanColumns, data.kanbanColumns || [])
+
+    if (data.adminSettings) {
+      for (const [k, v] of Object.entries(data.adminSettings)) {
+        yAdminSettings.set(k, v)
+      }
+    }
+  })
+}
+
+/* ================================
    KANBAN LOGIC (IMPORTANT)
 =============================== */
 
@@ -588,6 +655,8 @@ export function useYjs() {
     updateKanbanColumn,
     removeKanbanColumn,
     setPinCode,
+    exportData,
+    importData,
   }
 }
 

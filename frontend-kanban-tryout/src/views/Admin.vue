@@ -342,12 +342,30 @@
     <UnitForm v-if="showUnitForm && activeUnitEditId" :editId="activeUnitEditId" @close="closeUnitForm" />
     <SplitUnit v-if="showSplit && splitUnitId" :unitId="splitUnitId" @close="closeSplit" />
     <MergeUnits v-if="showMerge" :unitIds="selectedUnitIds" @close="closeMerge" />
+
+    <!-- Backup & Export -->
+    <div class="card mt-6">
+      <h2 class="text-base font-bold text-gray-900 mb-3">Backup &amp; Export</h2>
+      <div class="flex items-center gap-2">
+        <button @click="exportBackup" class="btn-primary btn-sm">
+          <span class="text-lg leading-none">⬇</span> Export JSON
+        </button>
+        <label class="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
+          Import JSON
+          <input type="file" accept=".json" @change="importBackup" class="hidden" />
+        </label>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">
+        Export includes all units, activities, sectors, radio channels, unit types, kanban columns, and settings.
+        Import replaces all existing data.
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useYjs, addPredefinedUnit, updatePredefinedUnit, removePredefinedUnit, addSector, updateSector, removeSector, addRadioChannel, updateRadioChannel, removeRadioChannel, addUnitType, updateUnitType, removeUnitType, addKanbanColumn, updateKanbanColumn, removeKanbanColumn, removeUnit, moveUnit, setPinCode, pinCode } from '../composables/useYjs.js'
+import { useYjs, addPredefinedUnit, updatePredefinedUnit, removePredefinedUnit, addSector, updateSector, removeSector, addRadioChannel, updateRadioChannel, removeRadioChannel, addUnitType, updateUnitType, removeUnitType, addKanbanColumn, updateKanbanColumn, removeKanbanColumn, removeUnit, moveUnit, setPinCode, pinCode, exportData, importData } from '../composables/useYjs.js'
 import { typeSummary, totalCrew, vehicleSearchText, normalizeVehicles } from '../composables/vehicles.js'
 import { useToast } from '../composables/useToast.js'
 import UnitForm from '../components/UnitForm.vue'
@@ -502,6 +520,43 @@ function savePin() {
 function clearPin() {
   setPinCode('')
   addToast('PIN removed', 'success')
+}
+
+/* ---------- Backup & Export ---------- */
+
+function exportBackup() {
+  const data = exportData()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `incident-tracker-backup-${new Date().toISOString().slice(0, 10)}.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+  addToast('Backup exported', 'success')
+}
+
+function importBackup(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result)
+      importData(data)
+      addToast('Backup imported – all data replaced', 'success')
+      event.target.value = ''
+    } catch (err) {
+      addToast('Import failed: invalid file', 'error')
+      console.error(err)
+    }
+  }
+  reader.onerror = () => {
+    addToast('Import failed: could not read file', 'error')
+  }
+  reader.readAsText(file)
 }
 
 /* ---------- Active Units ---------- */
