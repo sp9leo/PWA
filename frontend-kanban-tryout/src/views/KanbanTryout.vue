@@ -63,6 +63,9 @@
                 <span class="text-sm font-bold text-gray-900 bg-gray-200 px-2 py-0.5 rounded-md tabular-nums shrink-0">
                   {{ (grouped[col.statusKey] || []).length }}
                 </span>
+                <span v-if="crewInColumn(col.statusKey)" class="text-xs font-medium text-gray-500 ml-1">
+                  {{ crewInColumn(col.statusKey) }} crew
+                </span>
               </div>
               <button @click="quickAdd(col.statusKey)"
                 class="w-8 h-8 shrink-0 flex items-center justify-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 text-xl leading-none rounded-lg transition-colors">+</button>
@@ -365,6 +368,11 @@ function formatWhen(u) {
   const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
   if (d.toDateString() === now.toDateString()) return time
   return `${d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })} ${time}`
+}
+
+function crewInColumn(statusKey) {
+  const units = grouped[statusKey] || []
+  return units.reduce((sum, u) => sum + (u.personnelCount || 0), 0)
 }
 
 function onDragEnd() {

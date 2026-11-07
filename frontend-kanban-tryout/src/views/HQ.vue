@@ -100,6 +100,9 @@
                   <span class="text-sm font-bold text-gray-900 bg-gray-200 px-2 py-0.5 rounded-md tabular-nums shrink-0">
                     {{ colUnits(col.statusKey).length }}
                   </span>
+                  <span v-if="crewInColumn(col.statusKey)" class="text-xs font-medium text-gray-500 ml-1">
+                    {{ crewInColumn(col.statusKey) }} crew
+                  </span>
                 </div>
               </div>
               <div class="flex-1 p-3 space-y-3 min-h-[60px]">
@@ -461,6 +464,11 @@ function vehicleGroups(unit) {
 
 function vehicleSummary(unit) {
   return typeSummary(unit)
+}
+
+function crewInColumn(statusKey) {
+  const units = colUnits(statusKey)
+  return units.reduce((sum, u) => sum + (u.personnelCount || 0), 0)
 }
 </script>
 
